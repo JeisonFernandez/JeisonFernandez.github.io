@@ -1,1 +1,57 @@
-Hola mundo
+<?php
+
+// Crea una conexión a la base de datos
+$db = new PDO("mysql:host=localhost;dbname=my_database", "root", "");
+
+// Comprueba si el usuario está autenticado
+if (isset($_POST["username"]) && isset($_POST["password"])) {
+
+    // Obtén el nombre de usuario y la contraseña del formulario
+    $username = $_POST["username"];
+    $password = $_POST["password"];
+
+    // Realiza una consulta a la base de datos para verificar el usuario
+    $query = $db->prepare("SELECT * FROM users WHERE username = :username AND password = :password");
+    $query->bindParam(":username", $username);
+    $query->bindParam(":password", $password);
+    $query->execute();
+
+    // Si el usuario existe, inicia sesión
+    if ($query->rowCount() == 1) {
+
+        // Obtén los datos del usuario
+        $row = $query->fetch();
+
+        // Inicia sesión al usuario
+        $_SESSION["username"] = $row["username"];
+        $_SESSION["id"] = $row["id"];
+
+        // Redirige al usuario a la página principal
+        header("Location: index.php");
+    }
+}
+
+// Si el usuario no está autenticado, muestra el formulario de login
+else {
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+
+<form action="login.php" method="post">
+    <input type="text" name="username" placeholder="Nombre de usuario">
+    <input type="password" name="password" placeholder="Contraseña">
+    <input type="submit" value="Iniciar sesión">
+</form>
+
+</body>
+</html>
+
+<?php
+}
+?>
